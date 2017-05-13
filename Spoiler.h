@@ -9,9 +9,7 @@
 class Spoiler
 {
   public:
-    int delayTime = 5000; // Tune this to increase preciness and smoothness
-    int potMin = 600;
-    int potMax = 600;
+    int delayTime = 20000; // Tune this to increase precision and smoothness
 
     int POT_MIN = 200;
     int POT_MAX = 600;
@@ -22,13 +20,11 @@ class Spoiler
     int speedToAngle(int carSpeed);
     void setPosition(int motorAngle);
     int readResistor();
-    int resistorMap(int resistor);
 
   private:
     int _forwardsPin;
     int _backwardsPin;
     int _resistor;
-    int _lastRead;
     int _resistorPin;
 };
 

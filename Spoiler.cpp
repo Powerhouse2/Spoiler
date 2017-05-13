@@ -12,12 +12,15 @@
 
 /**
  * Calculate the optimal motor-angle from the optimal arm-angle
+ * This function can be overwritten in the master-code
  * @param  armAngle the optimal arm-angle
  * @return       integer representing the optimal motor-angle
  */
 int calculateMotorAngle(int armAngle)
 {
-	return 1;
+	// Not implemented yet
+	// Calculate optimal motor angle as a function of the spoiler angle
+	return armAngle;
 }
 
 /**
@@ -46,11 +49,6 @@ void Spoiler::init()
 	pinMode(_forwardsPin, OUTPUT);
 	pinMode(_backwardsPin, OUTPUT);
 	pinMode(_resistorPin, INPUT);
-
-	int precision = ((delayTime / 1000) * 20);
-
-	potMin = POT_MIN + precision;
-	potMax = POT_MAX - precision;
 }
 
 /**
@@ -63,8 +61,6 @@ void Spoiler::move(int carSpeed)
 	// Get the optimal motor-angle based on
 	// the cars current speed
 	int angle = Spoiler::speedToAngle(carSpeed);
-	Serial.print("Angle: ");
-	Serial.println(angle);
 
 	// Set the new Position
 	Spoiler::setPosition(angle);
@@ -81,6 +77,7 @@ int Spoiler::speedToAngle(int carSpeed)
 {
 	int armAngle = carSpeed / 150 * ( 1.55 * carSpeed );
 
+	// :: means global scope
 	return ::calculateMotorAngle(armAngle);
 }
 
@@ -91,13 +88,19 @@ int Spoiler::speedToAngle(int carSpeed)
  */
 void Spoiler::setPosition(int motorAngle)
 {
+	// Motorangle is not implemented yet, it currently represents
+	// The value that the potmeter needs to be at
+
+	// Make sure we do not fry the H-bridge
+	digitalWrite(_backwardsPin, LOW);
+	digitalWrite(_forwardsPin, LOW);
 
 	if(motorAngle > Spoiler::readResistor()){
 		/** Move Backwards  */
 
 		digitalWrite(_backwardsPin, HIGH);
 		while(motorAngle > Spoiler::readResistor()){
-			if(Spoiler::readResistor() > (potMax - 3)) {
+			if(Spoiler::readResistor() > (POT_MAX - 5)) {
 				// Add a small buffer to allow the actuator to stop
 				break;
 			}
@@ -111,7 +114,7 @@ void Spoiler::setPosition(int motorAngle)
 
 		digitalWrite(_forwardsPin, HIGH);
 		while(motorAngle < Spoiler::readResistor()){
-			if(Spoiler::readResistor() < (potMin + 3)) {
+			if(Spoiler::readResistor() < (POT_MIN + 5)) {
 				// Add a small buffer to allow the actuator to stop
 				break;
 			}
@@ -119,8 +122,10 @@ void Spoiler::setPosition(int motorAngle)
 			delayMicroseconds(delayTime);
 		}
 		digitalWrite(_forwardsPin, LOW);
-
 	}
+
+	// Prevent intertia from short-circuting the board
+	delay(100);
 }
 
 /**
@@ -130,8 +135,4 @@ void Spoiler::setPosition(int motorAngle)
 int Spoiler::readResistor()
 {
 	return analogRead(_resistorPin);
-}
-
-int Spoiler::resistorMap(int resistor){
-	return resistor;
 }
